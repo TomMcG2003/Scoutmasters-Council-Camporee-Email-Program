@@ -34,7 +34,6 @@ function sendEmailsFromSheet(sheetName, emailSubject, emailTemplate) {
     });
     // Combine the email addresses
     const recipients = [emailData["POC Email"], emailData["Alternate POC Email"]]
-    // TODO: You need to change the strings in the quotations so that they match what is in the Google Sheet.
       .filter(email => email) // Remove any empty email fields
       .join(","); // Separate multiple recipients with commas
     
@@ -60,10 +59,65 @@ function sendEmailsFromSheet(sheetName, emailSubject, emailTemplate) {
   );
 }
 
-const emailSubject = "West Point Scoutmasters' Council 61st Camporee";
-// TODO: Update this subject so that it is the current year's camporee
+function sendEmailsFromSheetWithFormatValidation(sheetName, emailSubject, emailTemplate){
+  // Access the active spreadsheet
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = spreadsheet.getSheetByName(sheetName);
+  // Handles the case that the sheet is not there.
+  if (!sheet) {
+    Logger.log(`Sheet with name '${sheetName}' not found.`);
+    return;
+  }
+  // Gets the data from the Google sheet
+  const data = sheet.getDataRange().getValues();
+  // Grabs the headers of the columns
+  const headers = data[0];
+  // Grabs the rest of the data and splits it into rows
+  const rows = data.slice(1);
+  // This is the regular expression that we will be working with to validate email address formats
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
 
-// TODO: Update all of the strings that are within the '{{}}' so that they match the headers in the Google Sheet
+  /**
+   * This is a for loop. What it does is go through every row in the Google Sheet 
+   * and parses the data by the headers. It will then store the email recipients
+   * in the <recipients> variable. This serves as our "to" line. It will then 
+   * validate the emails using the regular expression and log any non-valid emails
+   * in the console that pops up when you hit "run". It will then parse the email 
+   * script and add the personalized data to it. Given that there is at least one
+   * valid recipient, it will send the email to them. All external actions will be 
+   * logged in the console. 
+   */
+  rows.forEach(row =>{
+    const emailData = {};
+    headers.forEach((header, index) => {
+      emailData[header] = row[index];
+    });
+
+    const recipients = [emailData["POC Email"], emailData["Alternate POC Email"]]
+    .filter(email => email && emailRegex.test(email))
+    .join(",");
+
+    if (!recipients){
+      Logger.log(`No valid email addresses for row: ${JSON.stringify(emailData)}`);
+      return;
+    }
+
+    const personalizedEmail = emailTemplate.replace(/{{(.*?)}}/g, (match, p1) => emailData[p1.trim()] || "");
+
+    try{
+      GmailApp.sendEmail(recipients, emailSubject, personalizedEmail);
+      Logger.log(`Email number ${index} sent to ${recipients}`);
+    } catch (e){
+      Logger.log(`Error sending email number ${index} to ${recipients}. Error is ${e}`);
+    }
+
+  });
+  
+}
+
+const emailSubject = "West Point Scoutmasters' Council 61st Camporee";
+
+
 const acceptedShell = `
     Troop {{Troop Number}}, 
 
@@ -94,7 +148,7 @@ We look forward to welcoming you to this year’s camporee.
 Sincerely,
 West Point's Scoutmasters' Council
   `;
-// TODO: Update all of the strings that are within the '{{}}' so that they match the headers in the Google Sheet
+
 const delayedShell = `
 Troop {{Troop Number}}, 
 
@@ -112,4 +166,11 @@ function sendAllEmails(){
 sendEmailsFromSheet("Acceptances", emailSubject, acceptedShell);
 sendEmailsFromSheet("Delayed", emailSubject, delayedShell);
 }
-sendAllEmails();
+
+function sendAllEmailsWithValidation(){
+  sendAllEmailsWithValidation("Acceptances", emailSubject, acceptedShell);
+  sendAllEmailsWithValidation("Delayed", emailSubject, delayedShell);
+}
+
+Logger.log(`Sent all emails.`);
+
