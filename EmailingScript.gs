@@ -34,6 +34,7 @@ function sendEmailsFromSheet(sheetName, emailSubject, emailTemplate) {
     });
     // Combine the email addresses
     const recipients = [emailData["POC Email"], emailData["Alternate POC Email"]]
+    // TODO: You need to change the strings in the quotations so that they match what is in the Google Sheet.
       .filter(email => email) // Remove any empty email fields
       .join(","); // Separate multiple recipients with commas
     
@@ -60,8 +61,9 @@ function sendEmailsFromSheet(sheetName, emailSubject, emailTemplate) {
 }
 
 const emailSubject = "West Point Scoutmasters' Council 61st Camporee";
+// TODO: Update this subject so that it is the current year's camporee
 
-
+// TODO: Update all of the strings that are within the '{{}}' so that they match the headers in the Google Sheet
 const acceptedShell = `
     Troop {{Troop Number}}, 
 
@@ -92,7 +94,7 @@ We look forward to welcoming you to this year’s camporee.
 Sincerely,
 West Point's Scoutmasters' Council
   `;
-
+// TODO: Update all of the strings that are within the '{{}}' so that they match the headers in the Google Sheet
 const delayedShell = `
 Troop {{Troop Number}}, 
 
@@ -110,3 +112,4 @@ function sendAllEmails(){
 sendEmailsFromSheet("Acceptances", emailSubject, acceptedShell);
 sendEmailsFromSheet("Delayed", emailSubject, delayedShell);
 }
+sendAllEmails();
