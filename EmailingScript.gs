@@ -76,6 +76,7 @@ function sendEmailsFromSheetWithFormatValidation(sheetName, emailSubject, emailT
   const rows = data.slice(1);
   // This is the regular expression that we will be working with to validate email address formats
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+  // TODO: Update this regex if you would like more advanced email validation.
 
   /**
    * This is a for loop. What it does is go through every row in the Google Sheet 
@@ -92,23 +93,24 @@ function sendEmailsFromSheetWithFormatValidation(sheetName, emailSubject, emailT
     headers.forEach((header, index) => {
       emailData[header] = row[index];
     });
-
+    // This line will go into the data of the Google Sheet and grab the email addresses.
     const recipients = [emailData["POC Email"], emailData["Alternate POC Email"]]
+    // TODO: Update the strings in the quotations to reflect the correct headers in the Google Sheet
     .filter(email => email && emailRegex.test(email))
     .join(",");
-
+    // This if statement captures any instance where there are no valid email addresses
     if (!recipients){
       Logger.log(`No valid email addresses for row: ${JSON.stringify(emailData)}`);
       return;
     }
-
+    // This line is where we input the data from the Google Sheet to personalize it
     const personalizedEmail = emailTemplate.replace(/{{(.*?)}}/g, (match, p1) => emailData[p1.trim()] || "");
-
+    // This try/catch will handle any errors that we get and log them to the console.
     try{
       GmailApp.sendEmail(recipients, emailSubject, personalizedEmail);
-      Logger.log(`Email number ${index} sent to ${recipients}`);
+      Logger.log(`Email number ${index} sent to ${recipients}; Troop ID: ${emailData["Troop ID"]}`);
     } catch (e){
-      Logger.log(`Error sending email number ${index} to ${recipients}. Error is ${e}`);
+      Logger.log(`Error sending email number ${index} to ${recipients}, Troop ID: ${emailData["Troop ID"]}. Error is ${e}`);
     }
 
   });
@@ -117,7 +119,7 @@ function sendEmailsFromSheetWithFormatValidation(sheetName, emailSubject, emailT
 
 const emailSubject = "West Point Scoutmasters' Council 61st Camporee";
 
-
+// TODO: Change the variables in the "{{}}" to match what is in the Google Sheet
 const acceptedShell = `
     Troop {{Troop Number}}, 
 
@@ -148,7 +150,7 @@ We look forward to welcoming you to this year’s camporee.
 Sincerely,
 West Point's Scoutmasters' Council
   `;
-
+// TODO: Change the variables in the "{{}}" to match what is in the Google Sheet
 const delayedShell = `
 Troop {{Troop Number}}, 
 
@@ -160,9 +162,6 @@ Total Number Allowed:
   To avoid issues with acceptances next year, we have to limit the number of Scouts that you can apply for next year. You are only allowed to apply for a MAXIMUM of {{Attendees}} next year. You are able to bring less than {{Attendees}}, though no more than that. Thank you for your understanding.
 
 You will be able to input this delayed acceptance ID into the 2026 Camporee Registration form to be selected for the Camporee for 2026. 
-
-Sincerely,
-West Point's Scoutmasters' Council
 `;
 
 function sendAllEmails(){
@@ -174,6 +173,9 @@ function sendAllEmailsWithValidation(){
   sendAllEmailsWithValidation("Acceptances", emailSubject, acceptedShell);
   sendAllEmailsWithValidation("Delayed", emailSubject, delayedShell);
 }
+
+// sendAllEmails();
+// sendAllEmailsWithValidation();
 
 Logger.log(`Sent all emails.`);
 
