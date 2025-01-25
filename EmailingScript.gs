@@ -1,3 +1,8 @@
+/*
+ * Scoutmasters' Council Email Automation
+ * Copyright (C) 2025 onward, Thomas M. McGowan <tmcgowan2025@gmail.com>
+ */
+
 function sendEmailsFromSheet(sheetName, emailSubject, emailTemplate) {
   /**
    * const sheetName: This is the name of the sheet for which you would like to access the data for
