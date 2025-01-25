@@ -160,6 +160,9 @@ Total Number Allowed:
   To avoid issues with acceptances next year, we have to limit the number of Scouts that you can apply for next year. You are only allowed to apply for a MAXIMUM of {{Attendees}} next year. You are able to bring less than {{Attendees}}, though no more than that. Thank you for your understanding.
 
 You will be able to input this delayed acceptance ID into the 2026 Camporee Registration form to be selected for the Camporee for 2026. 
+
+Sincerely,
+West Point's Scoutmasters' Council
 `;
 
 function sendAllEmails(){
